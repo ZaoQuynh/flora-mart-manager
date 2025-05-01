@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../app_colors.dart';
+import 'package:intl/intl.dart'; // Import for number formatting
 
 class DashboardCardsWidget extends StatelessWidget {
-  const DashboardCardsWidget({super.key});
+  final bool isLoading;
+  final int orderCount;
+  final int productCount;
+  final int customerCount;
+  final double totalRevenue;
+
+  const DashboardCardsWidget({
+    super.key,
+    this.isLoading = false,
+    this.orderCount = 0,
+    this.productCount = 0,
+    this.customerCount = 0,
+    this.totalRevenue = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,43 +34,103 @@ class DashboardCardsWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildStatCard(
-                icon: Icons.shopping_bag,
-                title: 'Tổng đơn hàng',
-                value: '124',
-                color: Colors.blue,
-              ),
-              const SizedBox(width: 16),
-              _buildStatCard(
-                icon: Icons.inventory_2,
-                title: 'Loại cây',
-                value: '45',
-                color: Colors.green,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildStatCard(
-                icon: Icons.people,
-                title: 'Khách hàng',
-                value: '86',
-                color: Colors.orange,
-              ),
-              const SizedBox(width: 16),
-              _buildStatCard(
-                icon: Icons.money,
-                title: 'Doanh thu',
-                value: '14.5tr',
-                color: Colors.purple,
-              ),
-            ],
-          ),
+          isLoading 
+          ? _buildLoadingCards() 
+          : _buildDataCards(),
         ],
       ),
+    );
+  }
+
+  Widget _buildLoadingCards() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            _buildStatCard(
+              icon: Icons.shopping_bag,
+              title: 'Tổng đơn hàng',
+              value: '...',
+              color: Colors.blue,
+              isLoading: true,
+            ),
+            const SizedBox(width: 16),
+            _buildStatCard(
+              icon: Icons.inventory_2,
+              title: 'Loại cây',
+              value: '...',
+              color: Colors.green,
+              isLoading: true,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            _buildStatCard(
+              icon: Icons.people,
+              title: 'Khách hàng',
+              value: '...',
+              color: Colors.orange,
+              isLoading: true,
+            ),
+            const SizedBox(width: 16),
+            _buildStatCard(
+              icon: Icons.money,
+              title: 'Doanh thu',
+              value: '...',
+              color: Colors.purple,
+              isLoading: true,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDataCards() {
+    // Format currency (Vietnamese Dong)
+    final currencyFormatter = NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0);
+    final formattedRevenue = currencyFormatter.format(totalRevenue);
+    
+    return Column(
+      children: [
+        Row(
+          children: [
+            _buildStatCard(
+              icon: Icons.shopping_bag,
+              title: 'Tổng đơn hàng',
+              value: orderCount.toString(),
+              color: Colors.blue,
+            ),
+            const SizedBox(width: 16),
+            _buildStatCard(
+              icon: Icons.inventory_2,
+              title: 'Loại cây',
+              value: productCount.toString(),
+              color: Colors.green,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            _buildStatCard(
+              icon: Icons.people,
+              title: 'Khách hàng',
+              value: customerCount.toString(),
+              color: Colors.orange,
+            ),
+            const SizedBox(width: 16),
+            _buildStatCard(
+              icon: Icons.money,
+              title: 'Doanh thu',
+              value: '$formattedRevenueđ',
+              color: Colors.purple,
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -65,6 +139,7 @@ class DashboardCardsWidget extends StatelessWidget {
     required String title,
     required String value,
     required Color color,
+    bool isLoading = false,
   }) {
     return Expanded(
       child: Container(
@@ -104,7 +179,18 @@ class DashboardCardsWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
+            isLoading
+            ? SizedBox(
+                height: 20,
+                width: 60,
+                child: Center(
+                  child: LinearProgressIndicator(
+                    backgroundColor: Colors.grey[200],
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  ),
+                ),
+              )
+            : Text(
               value,
               style: const TextStyle(
                 fontSize: 20,

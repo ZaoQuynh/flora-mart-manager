@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/order_management_screen.dart';
+import 'screens/product_screen.dart';
+import 'screens/profile_screen.dart';
 import 'app_colors.dart';
 import 'services/auth_service.dart';
 
@@ -41,8 +44,110 @@ class MyApp extends StatelessWidget {
       home: const AuthCheckScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/main': (context) {
+          // Check if there's a tab index passed as an argument
+          final args = ModalRoute.of(context)?.settings.arguments;
+          return MainScreen(initialTabIndex: args is int ? args : 0);
+        },
       },
+    );
+  }
+}
+
+// Màn hình chính điều khiển bottom navigation
+class MainScreen extends StatefulWidget {
+  final int initialTabIndex;
+  
+  const MainScreen({
+    super.key, 
+    this.initialTabIndex = 0,
+  });
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+  
+  // Static method to access the state
+  static void navigateToTab(BuildContext context, int tabIndex) {
+    final navigatorState = Navigator.of(context);
+    // Check if already on MainScreen
+    if (context.findAncestorWidgetOfExactType<MainScreen>() != null) {
+      // Get the state using GlobalKey
+      final mainScreenState = context.findRootAncestorStateOfType<_MainScreenState>();
+      if (mainScreenState != null) {
+        mainScreenState.changeTab(tabIndex);
+      }
+    } else {
+      // Navigate to MainScreen with the specified tab
+      navigatorState.pushNamedAndRemoveUntil(
+        '/main',
+        (route) => false,
+        arguments: tabIndex,
+      );
+    }
+  }
+}
+
+class _MainScreenState extends State<MainScreen> {
+  late int _currentIndex;
+
+  // Danh sách các màn hình tương ứng với các tab
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const ProductScreen(), // Tạo file này nếu chưa có
+    const OrderManagementScreen(orders: [], shouldFetchOrders: true),
+    const ProfileScreen(), // Tạo file này nếu chưa có
+  ];
+  
+  // Phương thức để các widget con có thể kích hoạt chuyển tab
+  void changeTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialTabIndex;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _currentIndex,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Trang chủ',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.inventory),
+            label: 'Sản phẩm',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long),
+            label: 'Đơn hàng',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Cá nhân',
+          ),
+        ],
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+      ),
     );
   }
 }
@@ -70,7 +175,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => isLoggedIn ? const HomeScreen() : const LoginScreen(),
+          builder: (context) => isLoggedIn ? const MainScreen() : const LoginScreen(),
         ),
       );
     }
