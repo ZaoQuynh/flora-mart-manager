@@ -1,5 +1,4 @@
 import 'package:flora_manager/screens/forgot_password_screen.dart';
-import 'package:flora_manager/screens/home_screen.dart';
 import 'package:flora_manager/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart'; // Import the actual AuthService
@@ -255,9 +254,11 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (result['success']) {
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+    // ignore: use_build_context_synchronously
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/main',
+        (route) => false,
+        arguments: 0, // Default to first tab (Home)
       );
     }
   }

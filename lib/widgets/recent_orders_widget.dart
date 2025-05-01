@@ -1,54 +1,21 @@
-import 'package:flora_manager/screens/order_management_screen.dart';
 import 'package:flutter/material.dart';
 import '../../app_colors.dart';
-import '../../services/order_service.dart';
 import 'package:intl/intl.dart';
+import '../main.dart'; // Import MainScreen
 
-class RecentOrdersWidget extends StatefulWidget {
-  const RecentOrdersWidget({super.key});
+class RecentOrdersWidget extends StatelessWidget {
+  final List<dynamic> orders;
+  final bool isLoading;
+  final String? error;
+  final VoidCallback onRetry;
 
-  @override
-  State<RecentOrdersWidget> createState() => _RecentOrdersWidgetState();
-}
-
-class _RecentOrdersWidgetState extends State<RecentOrdersWidget> {
-  bool _isLoading = true;
-  List<dynamic> _orders = [];
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchOrders();
-  }
-
-  Future<void> _fetchOrders() async {
-    try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
-
-      final orders = await OrderService.getAllOrders();
-      
-      if (orders != null) {
-        setState(() {
-          _orders = orders;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _error = 'Không thể tải dữ liệu đơn hàng';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _error = 'Đã xảy ra lỗi: $e';
-        _isLoading = false;
-      });
-    }
-  }
+  const RecentOrdersWidget({
+    super.key,
+    required this.orders,
+    required this.isLoading,
+    this.error,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -69,23 +36,16 @@ class _RecentOrdersWidgetState extends State<RecentOrdersWidget> {
                 ),
               ),
               TextButton(
-                onPressed: _isLoading 
+                onPressed: isLoading 
                   ? null // Disable button when loading
                   : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => OrderManagementScreen(
-                            orders: _orders,
-                            shouldFetchOrders: false, // Indicate orders are already loaded
-                          ),
-                        ),
-                      );
+                      // Sử dụng phương thức tĩnh để chuyển đến tab Đơn hàng
+                      MainScreen.navigateToTab(context, 2); // Chuyển đến tab Đơn hàng (index 2)
                     },
                 child: Text(
                   'Xem tất cả',
                   style: TextStyle(
-                    color: _isLoading ? Colors.grey : AppColors.primary, // Change color when disabled
+                    color: isLoading ? Colors.grey : AppColors.primary, // Change color when disabled
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -93,14 +53,14 @@ class _RecentOrdersWidgetState extends State<RecentOrdersWidget> {
             ],
           ),
           const SizedBox(height: 12),
-          _buildContent(),
+          _buildContent(context),
         ],
       ),
     );
   }
 
-  Widget _buildContent() {
-    if (_isLoading) {
+  Widget _buildContent(BuildContext context) {
+    if (isLoading) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(24.0),
@@ -109,15 +69,15 @@ class _RecentOrdersWidgetState extends State<RecentOrdersWidget> {
       );
     }
 
-    if (_error != null) {
+    if (error != null) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_error!, style: const TextStyle(color: Colors.red)),
+            Text(error!, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _fetchOrders,
+              onPressed: onRetry,
               child: const Text('Thử lại'),
             ),
           ],
@@ -125,7 +85,7 @@ class _RecentOrdersWidgetState extends State<RecentOrdersWidget> {
       );
     }
 
-    if (_orders.isEmpty) {
+    if (orders.isEmpty) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(24.0),
@@ -135,7 +95,7 @@ class _RecentOrdersWidgetState extends State<RecentOrdersWidget> {
     }
 
     // Lấy 3 đơn hàng gần nhất để hiển thị
-    final recentOrders = _orders.length > 3 ? _orders.sublist(0, 3) : _orders;
+    final recentOrders = orders.length > 3 ? orders.sublist(0, 3) : orders;
 
     return Container(
       decoration: BoxDecoration(

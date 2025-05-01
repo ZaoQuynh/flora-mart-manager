@@ -1,11 +1,12 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:flora_manager/widgets/order_list.dart';
 import 'package:flutter/material.dart';
-import '../../services/order_service.dart';
+import '../widgets/order_list.dart';
+import '../services/order_service.dart';
 import '../widgets/order_status.dart';
 import '../widgets/filter_section.dart';
 import '../widgets/pagination_controls.dart';
+import '../app_colors.dart';
 
 class OrderManagementScreen extends StatefulWidget {
   final List<dynamic> orders;
@@ -245,7 +246,11 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
     
     if (_error != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Quản lý đơn hàng')),
+        appBar: AppBar(
+          title: const Text('Quản lý đơn hàng'),
+          backgroundColor: Colors.white,
+          elevation: 0,
+        ),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -263,60 +268,71 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Quản lý đơn hàng'),
-        elevation: 2,
+        title: const Text(
+          'Quản lý đơn hàng',
+          style: TextStyle(
+            color: AppColors.text,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: AppColors.primary),
             onPressed: widget.shouldFetchOrders ? _fetchOrders : null,
             tooltip: 'Làm mới dữ liệu',
           ),
         ],
       ),
-      body: Column(
-        children: [
-          FilterSection(
-            searchController: _searchController,
-            dateFilter: _dateFilter,
-            statusFilter: _statusFilter,
-            onSearchChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-                _applyFilters();
-              });
-            },
-            onDateFilterTap: _showDateRangePicker,
-            onStatusSelected: (status) {
-              setState(() {
-                _statusFilter = status;
-                _applyFilters();
-              });
-            },
-            onClearFilters: _clearFilters,
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: _filteredOrders.isEmpty
-                ? const Center(child: Text('Không có đơn hàng nào'))
-                : OrderList(
-                    orders: _displayedOrders,
-                    onUpdateStatus: _updateStatus,
-                  ),
-          ),
-          PaginationControls(
-            currentPage: _currentPage,
-            totalPages: _totalPages,
-            filteredOrdersCount: _filteredOrders.length,
-            displayedOrdersCount: _displayedOrders.length,
-            onPageChanged: (page) {
-              setState(() {
-                _currentPage = page;
-                _updateDisplayedOrders();
-              });
-            },
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: widget.shouldFetchOrders ? _fetchOrders : () async {},
+        child: Column(
+          children: [
+            FilterSection(
+              searchController: _searchController,
+              dateFilter: _dateFilter,
+              statusFilter: _statusFilter,
+              onSearchChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                  _applyFilters();
+                });
+              },
+              onDateFilterTap: _showDateRangePicker,
+              onStatusSelected: (status) {
+                setState(() {
+                  _statusFilter = status;
+                  _applyFilters();
+                });
+              },
+              onClearFilters: _clearFilters,
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: _filteredOrders.isEmpty
+                  ? const Center(child: Text('Không có đơn hàng nào'))
+                  : OrderList(
+                      orders: _displayedOrders,
+                      onUpdateStatus: _updateStatus,
+                    ),
+            ),
+            PaginationControls(
+              currentPage: _currentPage,
+              totalPages: _totalPages,
+              filteredOrdersCount: _filteredOrders.length,
+              displayedOrdersCount: _displayedOrders.length,
+              onPageChanged: (page) {
+                setState(() {
+                  _currentPage = page;
+                  _updateDisplayedOrders();
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

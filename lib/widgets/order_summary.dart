@@ -64,7 +64,7 @@ class OrderSummary extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            ...vouchers!.map((voucher) => _buildVoucherItem(voucher)).toList(),
+            ...vouchers!.map((voucher) => _buildVoucherItem(voucher)),
           ],
           const Divider(height: 16),
           Row(

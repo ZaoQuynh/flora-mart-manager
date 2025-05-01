@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import '../app_colors.dart';
 import '../utils/shared_pref_helper.dart';
+import '../services/order_service.dart';
+import '../services/product_service.dart';
 import '../widgets/user_header_widget.dart';
 import '../widgets/dashboard_cards_widget.dart';
 import '../widgets/recent_orders_widget.dart';
-import '../widgets/bottom_nav_bar_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,36 +15,79 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _userName = "Người dùng";
-  String? _avatarUrl;
-  bool _isLoading = true;
+  bool _isLoadingOrders = true;
+  bool _isLoadingProducts = true;
+  List<dynamic> _orders = [];
+  List<dynamic> _products = [];
+  String? _ordersError;
+  double _totalRevenue = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _fetchOrders();
+    _fetchProducts();
   }
 
-  Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
+  Future<void> _fetchOrders() async {
     try {
-      // Lấy thông tin người dùng từ SharedPreferences
-      final userJson = await SharedPrefHelper.getUserInfo();
-      if (userJson != null) {
-        final userData = jsonDecode(userJson);
+      setState(() {
+        _isLoadingOrders = true;
+        _ordersError = null;
+      });
+
+      final orders = await OrderService.getAllOrders();
+      
+      if (orders != null) {
+        // Calculate total revenue from orders
+        double totalRevenue = 0;
+        for (var order in orders) {
+          // Assuming each order has a 'totalPrice' or similar field
+          if (order['totalPrice'] != null) {
+            totalRevenue += (order['totalPrice'] as num).toDouble();
+          }
+        }
+
         setState(() {
-          _userName = userData['fullName'] ?? "Người dùng";
-          _avatarUrl = userData['avatar'];
+          _orders = orders;
+          _totalRevenue = totalRevenue;
+          _isLoadingOrders = false;
+        });
+      } else {
+        setState(() {
+          _ordersError = 'Không thể tải dữ liệu đơn hàng';
+          _isLoadingOrders = false;
         });
       }
     } catch (e) {
-      debugPrint('Error loading user data: $e');
-    } finally {
       setState(() {
-        _isLoading = false;
+        _ordersError = 'Đã xảy ra lỗi: $e';
+        _isLoadingOrders = false;
+      });
+    }
+  }
+
+  Future<void> _fetchProducts() async {
+    try {
+      setState(() {
+        _isLoadingProducts = true;
+      });
+
+      final products = await ProductService.getProducts();
+      
+      if (products != null) {
+        setState(() {
+          _products = products;
+          _isLoadingProducts = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingProducts = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoadingProducts = false;
       });
     }
   }
@@ -105,30 +148,61 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildHomeContent(),
-      bottomNavigationBar: const BottomNavBarWidget(currentIndex: 0),
+      body: _buildHomeContent(),
     );
   }
 
   Widget _buildHomeContent() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          UserHeaderWidget(
-            userName: _userName, 
-            avatarUrl: _avatarUrl,
-            onAddNewPlant: () {
-              // Xử lý khi nhấn nút thêm cây mới
-            },
-          ),
-          const SizedBox(height: 24),
-          const DashboardCardsWidget(),
-          const SizedBox(height: 24),
-          const RecentOrdersWidget(),
-        ],
+    return RefreshIndicator(
+      onRefresh: () async {
+        await Future.wait([
+          _fetchOrders(),
+          _fetchProducts(),
+        ]);
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            UserHeaderWidget(
+              onAddNewPlant: () {
+                // Xử lý khi nhấn nút thêm cây mới
+              }, userName: 'John Doe',
+            ),
+            const SizedBox(height: 24),
+            DashboardCardsWidget(
+              isLoading: _isLoadingOrders || _isLoadingProducts,
+              orderCount: _orders.length,
+              productCount: _products.length,
+              customerCount: _getUniqueCustomerCount(),
+              totalRevenue: _totalRevenue,
+            ),
+            const SizedBox(height: 24),
+            RecentOrdersWidget(
+              orders: _orders,
+              isLoading: _isLoadingOrders,
+              error: _ordersError,
+              onRetry: _fetchOrders,
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  // Helper method to get unique customer count from orders
+  int _getUniqueCustomerCount() {
+    if (_orders.isEmpty) return 0;
+    
+    // Extract unique customer IDs from orders
+    final Set<dynamic> uniqueCustomerIds = {};
+    
+    for (var order in _orders) {
+      if (order['customerId'] != null) {
+        uniqueCustomerIds.add(order['customerId']);
+      }
+    }
+    
+    return uniqueCustomerIds.length;
   }
 }
