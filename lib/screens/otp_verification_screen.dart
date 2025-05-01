@@ -34,7 +34,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   bool _isVerifying = false;
   bool _isSendingOtp = false;
   String? _errorMessage;
-  bool _otpSent = false;
   
   int _resendTime = 60;
   Timer? _timer;
@@ -79,7 +78,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       
       if (result) {
         setState(() {
-          _otpSent = true;
           _startResendTimer();
         });
       } else {

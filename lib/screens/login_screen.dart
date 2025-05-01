@@ -247,29 +247,18 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    try {
-      // Use the AuthService instead of direct HTTP call
-      final success = await AuthService.login(email, password);
-      
-      if (success) {
-        _showMessage('Đăng nhập thành công!');
-        
-        // Navigate to home or dashboard after successful login
-        // For example:
-        // ignore: use_build_context_synchronously
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      } else {
-        _showMessage('Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.');
-      }
-    } catch (e) {
-      _showMessage('Đã có lỗi xảy ra');
-      debugPrint('Login error: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    final result = await AuthService.login(email, password);
+    _showMessage(result['message']);
+    
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (result['success']) {
+      // ignore: use_build_context_synchronously
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
     }
   }
 

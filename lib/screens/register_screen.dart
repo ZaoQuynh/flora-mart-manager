@@ -119,6 +119,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 'username': _usernameController.text,
                 'phoneNumber': _phoneController.text,
                 'password': _passwordController.text,
+                'role': "ADMIN"
               },
             ),
           ),
