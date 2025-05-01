@@ -8,7 +8,7 @@ class AuthService {
   static const String baseUrl = 'http://192.168.1.165:8080/api/v1/auth';
 
   // Đăng nhập
-  static Future<bool> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
@@ -21,25 +21,29 @@ class AuthService {
       if (response.statusCode == 200) {
         try {
           final authResponse = AuthResponse.fromJson(jsonDecode(response.body));
-          
-          // Lưu token và thông tin người dùng
+          if(authResponse.accessToken.isEmpty) {
+            return {'success': false, 'message': 'Không nhận được access token.'};
+          }
+
+          if (authResponse.user.role != "ADMIN") {
+            return {'success': false, 'message': 'Tài khoản không có quyền ADMIN.'};
+          }
+
           await SharedPrefHelper.saveToken(authResponse.accessToken);
           await SharedPrefHelper.saveUserInfo(jsonEncode(response.body));
-          
-          return true;
+
+          return {'success': true, 'message': 'Đăng nhập thành công!'};
         } catch (e) {
-          debugPrint('Error parsing response: $e');
-          return false;
+          return {'success': false, 'message': 'Lỗi xử lý dữ liệu từ server.'};
         }
       } else {
-        debugPrint('Login failed: ${response.body}');
-        return false;
+        return {'success': false, 'message': 'Sai email hoặc mật khẩu.'};
       }
     } catch (e) {
-      debugPrint('Login error: $e');
-      return false;
+      return {'success': false, 'message': 'Không thể kết nối đến máy chủ.'};
     }
   }
+
 
   // Đăng ký
   static Future<bool> register(Map<String, String> userData) async {
