@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _isLoadingProducts = true;
       });
 
-      final products = await ProductService.getProducts();
+      final products = await ProductService.getAllProducts();
       
       if (products != null) {
         setState(() {
