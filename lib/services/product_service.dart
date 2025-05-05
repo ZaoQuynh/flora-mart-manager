@@ -5,32 +5,9 @@ import 'package:http/http.dart' as http;
 import '../utils/shared_pref_helper.dart';
 
 class ProductService {
-  static const String baseUrl = 'http://localhost:8080/api/v1/product';
-
-  // Lấy danh sách tất cả sản phẩm
-  static Future<List<dynamic>?> getProducts() async {
-    try {
-      final token = await SharedPrefHelper.getToken();
-      final response = await http.get(
-        Uri.parse(baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      debugPrint('Get products response: ${response.body}');
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      }
-    } catch (e) {
-      debugPrint('Get products error: $e');
-    }
-    return null;
-  }
-
-  // Thêm sản phẩm mới
+  static const String baseUrl = 'http://192.168.1.165:8080/api/v1/product';
+  
+  // Thêm sản phẩm mới với hai bước: (1) tạo Plant, (2) tạo Product
   static Future<Map<String, dynamic>?> addProduct(Map<String, dynamic> productData) async {
     try {
       // Bước 1: Tạo Plant trước
