@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../utils/shared_pref_helper.dart';
 
 class OrderService {
-  static const String baseUrl = 'http://192.168.1.165:8080/api/v1/order';
+  static const String baseUrl = 'http://localhost:8080/api/v1/order';
 
   // Lấy danh sách tất cả đơn hàng (ADMIN)
   static Future<List<dynamic>?> getAllOrders() async {
@@ -28,6 +28,40 @@ class OrderService {
     }
     return null;
   }
+
+static Future<Map<int, List<dynamic>>?> getRevenueData() async {
+  try {
+    final token = await SharedPrefHelper.getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/admin/revenue-by-year'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    debugPrint('All revenue data response: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final jsonMap = jsonDecode(response.body);
+
+      if (jsonMap != null && jsonMap['revenueDataByYear'] != null) {
+        final rawMap = Map<String, dynamic>.from(jsonMap['revenueDataByYear']);
+
+        // Convert String keys to int and List<dynamic> values
+        final parsedMap = rawMap.map((key, value) {
+          return MapEntry(int.parse(key), List<dynamic>.from(value));
+        });
+
+        return parsedMap;
+      }
+    }
+  } catch (e) {
+    debugPrint('Get all revenues error: $e');
+  }
+  return null;
+}
+
 
   // Lấy chi tiết đơn hàng theo ID
   static Future<Map<String, dynamic>?> getOrderById(int orderId) async {
@@ -99,7 +133,8 @@ class OrderService {
   }
 
   // Thêm đơn hàng mới
-  static Future<Map<String, dynamic>?> addOrder(Map<String, dynamic> orderData) async {
+  static Future<Map<String, dynamic>?> addOrder(
+      Map<String, dynamic> orderData) async {
     try {
       final token = await SharedPrefHelper.getToken();
       final response = await http.post(
@@ -168,7 +203,7 @@ class OrderService {
     return null;
   }
 
-   static Future<Map<String, dynamic>?> updateOrderStatus(int orderId) async {
+  static Future<Map<String, dynamic>?> updateOrderStatus(int orderId) async {
     try {
       final token = await SharedPrefHelper.getToken();
       final response = await http.patch(

@@ -40,7 +40,7 @@ class RecentOrdersWidget extends StatelessWidget {
                   ? null // Disable button when loading
                   : () {
                       // Sử dụng phương thức tĩnh để chuyển đến tab Đơn hàng
-                      MainScreen.navigateToTab(context, 2); // Chuyển đến tab Đơn hàng (index 2)
+                      MainScreen.navigateToTab(context, 3); // Chuyển đến tab Đơn hàng (index 2)
                     },
                 child: Text(
                   'Xem tất cả',

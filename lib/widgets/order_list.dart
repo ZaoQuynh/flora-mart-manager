@@ -1,3 +1,5 @@
+//import 'dart:nativewrappers/_internal/vm/lib/ffi_native_type_patch.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'order_status.dart';
@@ -199,12 +201,12 @@ class OrderCard extends StatelessWidget {
     // Calculate items subtotal
     if (order['orderItems'] != null && order['orderItems'].isNotEmpty) {
       for (var item in order['orderItems']) {
-        final qty = item['qty'] ?? 0;
-        final price = item['currentPrice'] ?? 0.0;
-        final itemDiscount = item['discounted'] ?? 0.0;
+        final int qty = item['qty'] ?? 0 as int;
+        final double price = (item['currentPrice'] ?? 0.0).toDouble();
+        final double itemDiscount = (item['discounted'] ?? 0.0).toDouble();
         
         // Apply item-level discount if available
-        final effectivePrice = price - itemDiscount;
+        final double effectivePrice = itemDiscount;
         subtotal += qty * effectivePrice;
       }
     }
@@ -212,26 +214,28 @@ class OrderCard extends StatelessWidget {
     double total = subtotal;
     
     // Apply voucher discounts if any - now always applying as percentage
-    if (order['vouchers'] != null && order['vouchers'].isNotEmpty) {
-      for (var voucher in order['vouchers']) {
-        final discountValue = voucher['discount'] ?? 0.0;
-        final minOrderAmount = voucher['minOrderAmount'] ?? 0.0;
-        final maxDiscount = voucher['maxDiscount'];
-        
-        if (total >= minOrderAmount) {
-          // Always apply as percentage regardless of type
-          double discountAmount = total * (discountValue / 100);
-          
-          // Apply max discount cap if specified
-          if (maxDiscount != null && discountAmount > maxDiscount) {
-            discountAmount = maxDiscount;
-          }
-          
-          discount += discountAmount;
-          total -= discountAmount;
-        }
+if (order['vouchers'] != null && order['vouchers'].isNotEmpty) {
+  for (var voucher in order['vouchers']) {
+    final double discountValue = (voucher['discount'] ?? 0.0).toDouble();
+    final double minOrderAmount = (voucher['minOrderAmount'] ?? 0.0).toDouble();
+    final double? maxDiscount = voucher['maxDiscount'] != null
+        ? (voucher['maxDiscount'] as num).toDouble()
+        : null;
+
+    if (total >= minOrderAmount) {
+      // Tính giảm giá theo phần trăm
+      double discountAmount = double.parse((total * (discountValue / 100)).toStringAsFixed(2));
+
+      // Giới hạn nếu có maxDiscount
+      if (maxDiscount != null && discountAmount > maxDiscount) {
+        discountAmount = maxDiscount;
       }
+
+      discount += discountAmount;
+      total -= discountAmount;
     }
+  }
+}
     
     if (total < 0) total = 0;
     
