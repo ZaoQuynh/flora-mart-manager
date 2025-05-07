@@ -5,7 +5,7 @@ import '../models/auth_reponse.dart';
 import '../utils/shared_pref_helper.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://192.168.1.165:8080/api/v1/auth';
+  static const String baseUrl = 'http://localhost:8080/api/v1/auth';
 
   // Đăng nhập
   static Future<Map<String, dynamic>> login(String email, String password) async {

@@ -11,7 +11,7 @@ enum MailType {
 }
 
 class MailService {
-  static const String baseUrl = 'http://192.168.1.165:8080/api/v1/mail';
+  static const String baseUrl = 'http://localhost:8080/api/v1/mail';
 
   // Lấy nội dung email dựa trên loại email và mã OTP
   Map<String, String> getEmailContent(MailType type, String otp) {

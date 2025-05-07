@@ -9,16 +9,17 @@ import 'screens/product_screen.dart';
 import 'screens/profile_screen.dart';
 import 'app_colors.dart';
 import 'services/auth_service.dart';
+import 'screens/statistics_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Cố định hướng màn hình (tùy chọn)
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   runApp(const MyApp());
 }
 
@@ -57,22 +58,23 @@ class MyApp extends StatelessWidget {
 // Màn hình chính điều khiển bottom navigation
 class MainScreen extends StatefulWidget {
   final int initialTabIndex;
-  
+
   const MainScreen({
-    super.key, 
+    super.key,
     this.initialTabIndex = 0,
   });
 
   @override
   State<MainScreen> createState() => _MainScreenState();
-  
+
   // Static method to access the state
   static void navigateToTab(BuildContext context, int tabIndex) {
     final navigatorState = Navigator.of(context);
     // Check if already on MainScreen
     if (context.findAncestorWidgetOfExactType<MainScreen>() != null) {
       // Get the state using GlobalKey
-      final mainScreenState = context.findRootAncestorStateOfType<_MainScreenState>();
+      final mainScreenState =
+          context.findRootAncestorStateOfType<_MainScreenState>();
       if (mainScreenState != null) {
         mainScreenState.changeTab(tabIndex);
       }
@@ -94,17 +96,18 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const ProductScreen(), // Tạo file này nếu chưa có
+    const StatisticsScreen(), // Tạo file này nếu chưa có
     const OrderManagementScreen(orders: [], shouldFetchOrders: true),
     const ProfileScreen(), // Tạo file này nếu chưa có
   ];
-  
+
   // Phương thức để các widget con có thể kích hoạt chuyển tab
   void changeTab(int index) {
     setState(() {
       _currentIndex = index;
     });
   }
-  
+
   @override
   void initState() {
     super.initState();
@@ -132,6 +135,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.inventory),
             label: 'Sản phẩm',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Thống kê',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long),
@@ -170,12 +177,13 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   Future<void> _checkLogin() async {
     // Kiểm tra xem đã đăng nhập chưa
     final isLoggedIn = await AuthService.isLoggedIn();
-    
+
     // Điều hướng dựa trên trạng thái đăng nhập
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => isLoggedIn ? const MainScreen() : const LoginScreen(),
+          builder: (context) =>
+              isLoggedIn ? const MainScreen() : const LoginScreen(),
         ),
       );
     }

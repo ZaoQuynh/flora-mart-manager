@@ -61,11 +61,11 @@ class OrderItemCard extends StatelessWidget {
     final product = item['product'] ?? {};
     final plant = product['plant'] ?? {};
     final productName = plant['name'] ?? 'Sản phẩm không xác định';
-    final quantity = item['qty'] ?? 0;
-    final price = item['currentPrice'] ?? 0.0;
-    final discounted = item['discounted'] ?? 0.0;
-    final effectivePrice = price - discounted;
-    final total = effectivePrice * quantity;
+    final int quantity = item['qty'] ?? 0;
+    final double price = item['currentPrice'] ?? 0.0;
+    final double discounted = item['discounted'] ?? 0.0;
+    final double effectivePrice = discounted;
+    final double total = effectivePrice * quantity;
     final imageUrl = plant['img'];
 
     return Card(
@@ -200,7 +200,7 @@ class LegacyOrderItemCard extends StatelessWidget {
               ),
             ),
             Text(
-              NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(total),
+              NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(total.toStringAsFixed(2)),
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ],

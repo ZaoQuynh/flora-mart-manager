@@ -1,0 +1,2 @@
+D:/Nam4/SS2/ADMP/manager/flora-mart-manager/android/app/.cxx/Debug/716u1v3o/x86_64/CMakeFiles/edit_cache.dir
+D:/Nam4/SS2/ADMP/manager/flora-mart-manager/android/app/.cxx/Debug/716u1v3o/x86_64/CMakeFiles/rebuild_cache.dir

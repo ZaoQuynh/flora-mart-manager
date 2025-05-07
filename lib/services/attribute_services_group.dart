@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../utils/shared_pref_helper.dart';
 
 class AttributeGroupService {
-  static const String baseUrl = 'http://192.168.1.165:8080/api/v1/attribute-group';
+  static const String baseUrl = 'http://localhost:8080/api/v1/attribute-group';
 
   // Lấy danh sách nhóm thuộc tính
   static Future<List<dynamic>?> getAttributeGroups() async {
