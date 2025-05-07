@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../utils/shared_pref_helper.dart';
 
 class DescriptionGroupService {
-  static const String baseUrl = 'http://192.168.1.165:8080/api/v1/description-group';
+  static const String baseUrl = 'http://localhost:8080/api/v1/description-group';
 
   // Lấy danh sách nhóm mô tả
   static Future<List<dynamic>?> getDescriptionGroups() async {

@@ -167,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
             UserHeaderWidget(
               onAddNewPlant: () {
                 // Xử lý khi nhấn nút thêm cây mới
-              }, userName: 'John Doe',
+              }, userName: 'Hoang Cong Manh',
             ),
             const SizedBox(height: 24),
             DashboardCardsWidget(

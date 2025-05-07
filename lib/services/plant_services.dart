@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../utils/shared_pref_helper.dart';
 
 class PlantService {
-  static const String baseUrl = 'http://192.168.1.165:8080/api/v1/plant';
+  static const String baseUrl = 'http://localhost:8080/api/v1/plant';
 
   // Thêm cây mới
   static Future<Map<String, dynamic>?> addPlant(Map<String, dynamic> plantData) async {
